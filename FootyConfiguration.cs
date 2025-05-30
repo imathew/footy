@@ -10,10 +10,8 @@ public static class FootyConfiguration
     public static int ClientCacheSeconds { get; set; } = 0;
     public static int ServerCacheSeconds { get; set; } = 0;
 
-    // Melbourne timezone
-    private static readonly TimeZoneInfo MelbourneTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Australia/Melbourne");
-
-    // Always returns current time in Melbourne timezone
+    // Always show Melb time
+    public static readonly TimeZoneInfo MelbourneTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Australia/Melbourne");
     public static DateTimeOffset MelbourneNow => TimeZoneInfo.ConvertTime(DateTimeOffset.Now, MelbourneTimeZone);
 
     public static readonly IReadOnlyDictionary<int, string> Teams = new Dictionary<int, string>

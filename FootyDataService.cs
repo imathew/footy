@@ -108,9 +108,12 @@ public class FootyDataService : IFootyDataService
                     if (string.IsNullOrEmpty(round.Start) || string.IsNullOrEmpty(round.End))
                         continue;
 
-                    if (!DateTime.TryParse(round.Start, out var start) ||
-                        !DateTime.TryParse(round.End, out var end))
+                    if (!DateTimeOffset.TryParse(round.Start, out var startOffset) ||
+                        !DateTimeOffset.TryParse(round.End, out var endOffset))
                         continue;
+
+                    var start = startOffset.UtcDateTime;
+                    var end = endOffset.UtcDateTime;
 
                     var startDiff = Math.Abs((start - now).TotalSeconds);
                     var endDiff = Math.Abs((end - now).TotalSeconds);
@@ -158,8 +161,12 @@ public class FootyDataService : IFootyDataService
 
     private static Match? ConvertDtoToMatch(MatchDto matchDto)
     {
-        if (!DateTime.TryParse(matchDto.Date, CultureInfo.InvariantCulture, DateTimeStyles.None, out var date))
+        // Use DateTimeOffset to properly parse timezone-aware dates
+        if (!DateTimeOffset.TryParse(matchDto.Date, out var dateOffset))
             return null;
+
+        // Convert to UTC DateTime for consistent storage
+        var date = dateOffset.UtcDateTime;
 
         Clock? clock = matchDto.Clock != null
             ? new Clock(matchDto.Clock.Period, matchDto.Clock.Seconds)
@@ -168,7 +175,7 @@ public class FootyDataService : IFootyDataService
         return new Match(
             matchDto.VenueId,
             matchDto.Status,
-            date,
+            date,  // Now stored as UTC
             new Team(matchDto.HomeSquadId, new Score(
                 matchDto.HomeGoals.GetValueOrDefault(),
                 matchDto.HomeBehinds.GetValueOrDefault(),
