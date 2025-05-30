@@ -177,7 +177,7 @@ public class HtmlGenerator()
             "complete" => "FT",
             "playing" when match.Clock != null => FormatClockText(match.Clock),
             "playing" => "LIVE",
-            "scheduled" => match.Date.ToString("ddd h:mmtt"),
+            "scheduled" => TimeZoneInfo.ConvertTimeFromUtc(match.Date, FootyConfiguration.MelbourneTimeZone).ToString("ddd h:mmtt"),
             _ => match.Status
         };
 
@@ -232,5 +232,4 @@ public class HtmlGenerator()
 </body>
 </html>";
     }
-
 }
