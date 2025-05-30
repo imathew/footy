@@ -1,0 +1,238 @@
+/* CSS Variables */
+:root {
+    --base-font-size: 120%;
+    --bg-color: #f9f9fb;
+    --text-color: #333333;
+    --secondary-color: #666666;
+    --highlight-color: #006699;
+    --icon-bg: transparent;
+    --primary-font: sans-serif;
+    --monospace-font: monospace;
+    /*--transition-time: 0.3s;*/
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-color: #2b2a33;
+        --text-color: #f0f0f0;
+        --secondary-color: #999999;
+        --highlight-color: #66b3ff;
+        --icon-bg: #ffffff;
+    }
+}
+
+/* Reset and Base */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--primary-font);
+    font-size: var(--base-font-size);
+    line-height: 1.4;
+    color: var(--text-color);
+    background-color: var(--bg-color);
+    max-width: 30em;
+    min-width: 20em;
+    margin: 0 auto;
+    overflow-x: hidden;
+    /*transition: background-color var(--transition-time) ease, color var(--transition-time) ease;*/
+}
+
+/* Links */
+a {
+    color: var(--highlight-color);
+    text-decoration: none;
+    padding: 0.2em 0;
+    /*transition: color var(--transition-time) ease;*/
+}
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+/* Layout */
+body,
+#footyScores,
+main,
+section,
+table {
+    width: 100%;
+}
+
+/* Table */
+.round-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.9em;
+    margin-bottom: 2em;
+}
+
+/* Headers */
+.match-header,
+.round-header {
+    text-align: center;
+}
+
+.round-header {
+    font-size: 0.9em;
+    font-weight: bold;
+    padding: 0.75em 0 0.3em;
+}
+
+.round-date {
+    color: var(--secondary-color);
+    font-size: 0.9em;
+    font-weight: normal;
+}
+
+.match-header {
+    color: var(--secondary-color);
+    font-size: 0.75em;
+    padding: 1.2em 0 0;
+}
+
+    .match-header.playing {
+        color: var(--highlight-color);
+        font-weight: bold;
+    }
+
+/* Match rows */
+.match-row {
+    padding: 0.3em 0;
+}
+
+/* Team alignment and styling */
+.home {
+    text-align: right;
+}
+
+.away {
+    text-align: left;
+}
+
+.team-name {
+    width: 25%;
+}
+
+    .team-name.home {
+        padding-right: 0.5em;
+    }
+
+    .team-name.away {
+        padding-left: 0.5em;
+    }
+
+/* Team icons */
+.team-icon {
+    width: 2em;
+    padding: 0 0.25em;
+}
+
+    .team-icon.home {
+        padding-left: 0.15em;
+    }
+
+    .team-icon.away {
+        padding-right: 0.15em;
+    }
+
+    .team-icon img,
+    .bye-teams img {
+        background-color: var(--icon-bg);
+        border-radius: 50%;
+        box-sizing: content-box;
+        height: 1.5em;
+        width: 1.5em;
+        padding: 0.1em;
+    }
+
+    .team-icon img {
+        display: block;
+        margin: 0 auto;
+    }
+
+.bye-teams img {
+    margin: 0.5em;
+    vertical-align: middle;
+}
+
+/* Score styling */
+.score {
+    font-family: var(--monospace-font);
+}
+
+    .score.detail {
+        color: var(--secondary-color);
+        font-size: 0.85em;
+        width: 10%;
+    }
+
+    .score.total {
+        font-size: 1.3em;
+        font-weight: bold;
+        width: 13%;
+    }
+
+        .score.total.home {
+            padding-right: 0.5em;
+        }
+
+        .score.total.away {
+            padding-left: 0.5em;
+        }
+
+/* Live match emphasis */
+.match-row.playing > .score.total {
+    font-size: 1.5em;
+}
+
+/* Winner highlighting */
+.match-row.home > .team-name.home,
+.match-row.away > .team-name.away,
+.match-row.complete.level > .team-name {
+    color: var(--highlight-color);
+    font-weight: bold;
+}
+
+/* Navigation */
+.navigation-links {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85em;
+}
+
+.nav-link {
+    padding: 0.5em;
+}
+
+.prev-link {
+    margin-right: auto;
+}
+
+.next-link {
+    margin-left: auto;
+}
+
+/* Footer */
+.date-time {
+    display: block;
+    font-family: var(--monospace-font);
+    font-size: 0.8em;
+    color: var(--secondary-color);
+    text-align: center;
+}
+
+/* Bye teams */
+.bye-teams {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* Utilities */
+.disabled {
+    visibility: hidden;
+}
