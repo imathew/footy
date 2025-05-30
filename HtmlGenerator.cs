@@ -33,11 +33,13 @@ public class HtmlGenerator()
     <link rel=""manifest"" href=""/site.webmanifest"" />
 </head>
 <body>
+<main>
 <h1 class=""sr-only"">Footy Scores</h1>
-<main><section id=""scores""><div id=""footyScores"">
+<div id=""footyScores"">
 {scoresHtml}
 
-</div></section></main>
+</div>
+</main>
 </body>
 </html>";
 
@@ -212,22 +214,20 @@ public class HtmlGenerator()
 </head>
 <body>
     <main>
-        <section id=""scores"">
-            <div id=""footyScores"">
-                <table class=""round-table"">
-                    <thead>
-                        <tr>
-                            <th class=""round-header"">Error</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td colspan=""8"" class=""error-message"">{HttpUtility.HtmlEncode(errorMessage)}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
+        <div id=""footyScores"">
+            <table class=""round-table"">
+                <thead>
+                    <tr>
+                        <th class=""round-header"">Error</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan=""8"" class=""error-message"">{HttpUtility.HtmlEncode(errorMessage)}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </main>
 </body>
 </html>";
