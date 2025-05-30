@@ -12,7 +12,7 @@ var host = new HostBuilder()
         FootyConfiguration.ApiUrl = configuration["SCORES_URL"]
             ?? throw new InvalidOperationException("SCORES_URL configuration is required");
 
-        // Set cache times from configuration (with defaults if not specified)
+        // Set cache times from configuration
         if (int.TryParse(configuration["CLIENT_CACHE_SECS"], out var clientCacheSecs))
         {
             FootyConfiguration.ClientCacheSeconds = clientCacheSecs;

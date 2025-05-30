@@ -51,7 +51,7 @@ public class HtmlGenerator()
         var matchesHtml = new StringBuilder();
         foreach (var match in round.Matches)
         {
-            matchesHtml.Append(GenerateMatchHtml(match));  // Remove await
+            matchesHtml.Append(GenerateMatchHtml(match));
         }
 
         string roundHeader = FormatRoundHeaderWithDateRange(round);
