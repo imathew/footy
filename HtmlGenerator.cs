@@ -33,13 +33,11 @@ public class HtmlGenerator()
     <link rel=""manifest"" href=""/site.webmanifest"" />
 </head>
 <body>
-    <main>
-        <section id=""scores"">
-            <div id=""footyScores"">
-                {scoresHtml}
-            </div>
-        </section>
-    </main>
+<h1 class=""sr-only"">Footy Scores</h1>
+<main><section id=""scores""><div id=""footyScores"">
+{scoresHtml}
+
+</div></section></main>
 </body>
 </html>";
 
