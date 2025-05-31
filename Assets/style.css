@@ -1,249 +1,232 @@
-/* CSS Variables */
 :root {
     --base-font-size: 120%;
     --bg-color: #f9f9fb;
-    --text-color: #333333;
-    --secondary-color: #666666;
-    --highlight-color: #006699;
+    --highlight-color: #069;
     --icon-bg: transparent;
-    --primary-font: sans-serif;
     --monospace-font: monospace;
-    /*--transition-time: 0.3s;*/
+    --primary-font: sans-serif;
+    --secondary-color: #666;
+    --text-color: #333
+}
+
+.dark-icon {
+    display: none
+}
+
+.light-icon {
+    display: block
 }
 
 @media (prefers-color-scheme: dark) {
     :root {
         --bg-color: #2b2a33;
-        --text-color: #f0f0f0;
-        --secondary-color: #999999;
         --highlight-color: #66b3ff;
-        --icon-bg: #ffffff;
+        --secondary-color: #999;
+        --text-color: #f0f0f0
+    }
+
+    .dark-icon {
+        display: block
+    }
+
+    .light-icon {
+        display: none
     }
 }
 
-/* Reset and Base */
 * {
     box-sizing: border-box;
     margin: 0;
-    padding: 0;
+    padding: 0
 }
 
 body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
     font-family: var(--primary-font);
     font-size: var(--base-font-size);
     line-height: 1.4;
-    color: var(--text-color);
-    background-color: var(--bg-color);
+    margin: 0 auto;
     max-width: 30em;
     min-width: 20em;
-    margin: 0 auto;
-    overflow-x: hidden;
-    /*transition: background-color var(--transition-time) ease, color var(--transition-time) ease;*/
+    overflow-x: hidden
 }
 
-/* Links */
 a {
     color: var(--highlight-color);
-    text-decoration: none;
-    padding: 0.2em 0;
-    /*transition: color var(--transition-time) ease;*/
+    padding: .2em 0;
+    text-decoration: none
 }
 
     a:hover {
-        text-decoration: underline;
+        text-decoration: underline
     }
 
-/* Layout */
-body,
-#footyScores,
-main,
-table {
-    width: 100%;
+body, #footyScores, main, table {
+    width: 100%
 }
 
-/* Table */
 .round-table {
     border-collapse: separate;
     border-spacing: 0;
-    font-size: 0.9em;
-    margin-bottom: 2em;
+    font-size: .9em;
+    margin-bottom: 2em
 }
 
-/* Headers */
-.match-header,
-.round-header {
-    text-align: center;
+.match-header, .round-header {
+    text-align: center
 }
 
 .round-header {
-    font-size: 0.9em;
-    font-weight: bold;
-    padding: 0.75em 0 0.3em;
+    font-size: .9em;
+    font-weight: 700;
+    padding: .75em 0 .3em
 }
 
 .round-date {
     color: var(--secondary-color);
-    font-size: 0.9em;
-    font-weight: normal;
+    font-size: .9em;
+    font-weight: 400
 }
 
 .match-header {
     color: var(--secondary-color);
-    font-size: 0.75em;
-    padding: 1.2em 0 0;
+    font-size: .75em;
+    padding: 1.2em 0 0
 }
 
     .match-header.playing {
         color: var(--highlight-color);
-        font-weight: bold;
+        font-weight: 700
     }
 
-/* Match rows */
 .match-row {
-    padding: 0.3em 0;
+    padding: .3em 0
 }
 
-/* Team alignment and styling */
 .home {
-    text-align: right;
+    text-align: right
 }
 
 .away {
-    text-align: left;
+    text-align: left
 }
 
 .team-name {
-    width: 25%;
+    width: 25%
 }
 
     .team-name.home {
-        padding-right: 0.5em;
+        padding-right: .5em
     }
 
     .team-name.away {
-        padding-left: 0.5em;
+        padding-left: .5em
     }
 
-/* Team icons */
 .team-icon {
-    width: 2em;
-    padding: 0 0.25em;
+    padding: 0 .25em;
+    width: 2em
 }
 
     .team-icon.home {
-        padding-left: 0.15em;
+        padding-left: .15em
     }
 
     .team-icon.away {
-        padding-right: 0.15em;
+        padding-right: .15em
     }
 
-    .team-icon img,
-    .bye-teams img {
-        background-color: var(--icon-bg);
-        border-radius: 50%;
+    .team-icon svg, .bye-teams svg {
         box-sizing: content-box;
         height: 1.5em;
-        width: 1.5em;
-        padding: 0.1em;
+        padding: .1em;
+        width: 1.5em
     }
 
-    .team-icon img {
+    .team-icon svg {
         display: block;
-        margin: 0 auto;
+        margin: 0 auto
     }
 
-.bye-teams img {
-    margin: 0.5em;
-    vertical-align: middle;
+.bye-teams svg {
+    margin: .5em;
+    vertical-align: middle
 }
 
-/* Score styling */
 .score {
-    font-family: var(--monospace-font);
+    font-family: var(--monospace-font)
 }
 
     .score.detail {
         color: var(--secondary-color);
-        font-size: 0.85em;
-        width: 10%;
+        font-size: .85em;
+        width: 10%
     }
 
     .score.total {
         font-size: 1.3em;
-        font-weight: bold;
-        width: 13%;
+        font-weight: 700;
+        width: 13%
     }
 
         .score.total.home {
-            padding-right: 0.5em;
+            padding-right: .5em
         }
 
         .score.total.away {
-            padding-left: 0.5em;
+            padding-left: .5em
         }
 
-/* Live match emphasis */
-.match-row.playing > .score.total {
-    font-size: 1.5em;
-}
-
-/* Winner highlighting */
-.match-row.home > .team-name.home,
-.match-row.away > .team-name.away,
-.match-row.complete.level > .team-name {
+.match-row.home > .team-name.home, .match-row.away > .team-name.away, .match-row.complete.level > .team-name {
     color: var(--highlight-color);
-    font-weight: bold;
+    font-weight: 700
 }
 
-/* Navigation */
 .navigation-links {
     display: flex;
-    justify-content: space-between;
-    font-size: 0.85em;
+    font-size: .85em;
+    justify-content: space-between
 }
 
 .nav-link {
-    padding: 0.5em;
+    padding: .5em
 }
 
 .prev-link {
-    margin-right: auto;
+    margin-right: auto
 }
 
 .next-link {
-    margin-left: auto;
+    margin-left: auto
 }
 
-/* Footer */
 .date-time {
+    color: var(--secondary-color);
     display: block;
     font-family: var(--monospace-font);
-    font-size: 0.8em;
-    color: var(--secondary-color);
-    text-align: center;
+    font-size: .8em;
+    text-align: center
 }
 
-/* Bye teams */
 .bye-teams {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
+    justify-content: center
 }
 
-/* Utilities */
 .disabled {
-    visibility: hidden;
+    visibility: hidden
 }
 
 .sr-only {
-    position: absolute;
-    width: 1px;
+    border: 0;
+    clip: rect(0,0,0,0);
     height: 1px;
-    padding: 0;
     margin: -1px;
     overflow: hidden;
-    clip: rect(0,0,0,0);
+    padding: 0;
+    position: absolute;
     white-space: nowrap;
-    border: 0;
+    width: 1px
 }

@@ -31,6 +31,8 @@ public class HtmlGenerator()
     <link rel=""apple-touch-icon"" sizes=""180x180"" href=""/apple-touch-icon.png"" />
     <meta name=""apple-mobile-web-app-title"" content=""Footy"" />
     <link rel=""manifest"" href=""/site.webmanifest"" />
+    <meta name=""theme-color"" content=""#f9f9fb"" media=""(prefers-color-scheme: light)"">
+    <meta name=""theme-color"" content=""#2b2a33"" media=""(prefers-color-scheme: dark)"">
 </head>
 <body>
 <main>
@@ -118,14 +120,14 @@ public class HtmlGenerator()
             <td colspan=""8"" class=""match-header {match.Status}"">{matchHeader}</td>
         </tr>
         <tr class=""match-row {match.Status} {winningClass}"">
-            <td class=""team-icon home""><img src=""/icons/{homeTeamNickname.ToLower()}.svg"" alt=""""></td>
+            <td class=""team-icon home""><svg><use class=""light-icon"" href=""/teams.svg#{homeTeamNickname.ToLower()}""></use><use class=""dark-icon"" href=""/teams.svg#{homeTeamNickname.ToLower()}-dark""></use></svg></td>
             <td class=""team-name home"">{homeTeamNickname}</td>
             <td class=""score detail home"">{homeScoreDetail}</td>
             <td class=""score total home"">{match.Home.Score.Total}</td>
             <td class=""score total away"">{match.Away.Score.Total}</td>
             <td class=""score detail away"">{awayScoreDetail}</td>
             <td class=""team-name away"">{awayTeamNickname}</td>
-            <td class=""team-icon away""><img src=""/icons/{awayTeamNickname.ToLower()}.svg"" alt=""""></td>
+            <td class=""team-icon away""><svg><use class=""light-icon"" href=""/teams.svg#{awayTeamNickname.ToLower()}""></use><use class=""dark-icon"" href=""/teams.svg#{awayTeamNickname.ToLower()}-dark""></use></svg></td>
         </tr>";
     }
 
@@ -140,7 +142,7 @@ public class HtmlGenerator()
         {
             if (FootyConfiguration.Teams.TryGetValue(teamId, out var teamName))
             {
-                html.Append($"<img src=\"/icons/{teamName.ToLower()}.svg\" alt=\"{teamName}\" class=\"bye-team-icon\"> ");
+                html.Append($"<svg class=\"bye-team-icon\"><use class=\"light-icon\" href=\"/teams.svg#{teamName.ToLower()}\"></use><use class=\"dark-icon\" href=\"/teams.svg#{teamName.ToLower()}-dark\"></use></svg>");
             }
         }
 
