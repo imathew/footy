@@ -44,10 +44,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Assets\icons\" />
-	</ItemGroup>
-
-	<ItemGroup>
 	  <None Include="FootyPage.cs" />
 	</ItemGroup>
 </Project>
