@@ -21,18 +21,22 @@ public class HtmlGenerator()
     <meta name=""robots"" content=""noindex,nofollow"">
     <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
     <title>Footy Scores</title>
+    
+    <link rel=""preload"" href=""style.css"" as=""style"">
+    <link rel=""preload"" href=""teams.svg"" as=""image"" type=""image/svg+xml"">
     <link rel=""stylesheet"" href=""style.css"">
+    
     <meta name=""description"" content=""Local footy scores for local people"">
     <meta property=""og:image"" content=""/icon512.png"">
-
+    <meta name=""theme-color"" content=""#f9f9fb"" media=""(prefers-color-scheme: light)"">
+    <meta name=""theme-color"" content=""#2b2a33"" media=""(prefers-color-scheme: dark)"">
+    
     <link rel=""icon"" type=""image/png"" href=""/favicon96.png"" sizes=""96x96"" />
     <link rel=""icon"" type=""image/svg+xml"" href=""/favicon.svg"" />
     <link rel=""shortcut icon"" href=""/favicon.ico"" />
     <link rel=""apple-touch-icon"" sizes=""180x180"" href=""/apple-touch-icon.png"" />
     <meta name=""apple-mobile-web-app-title"" content=""Footy"" />
     <link rel=""manifest"" href=""/site.webmanifest"" />
-    <meta name=""theme-color"" content=""#f9f9fb"" media=""(prefers-color-scheme: light)"">
-    <meta name=""theme-color"" content=""#2b2a33"" media=""(prefers-color-scheme: dark)"">
 </head>
 <body>
 <main>
