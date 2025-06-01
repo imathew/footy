@@ -8,11 +8,21 @@ namespace FootyScores;
 
 public class HtmlGenerator()
 {
-    public static string GenerateCompletePage(Round? round)
+    public static string GenerateCompletePage(Round? round, string? assetVersion = null)
     {
         var scoresHtml = round != null
             ? GenerateRoundHtml(round)
             : "<table class=\"round-table\"><thead><tr><th class=\"round-header\">No round found!</th></tr></thead></table>";
+
+        // Helper function to add version to asset URLs
+        string VersionedUrl(string path)
+        {
+            if (!string.IsNullOrEmpty(assetVersion))
+            {
+                return $"{path}?v={assetVersion}";
+            }
+            return path;
+        }
 
         var html = $@"<!DOCTYPE html>
 <html class=""no-js"" lang=""en"">
@@ -22,21 +32,21 @@ public class HtmlGenerator()
     <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
     <title>Footy Scores</title>
     
-    <link rel=""preload"" href=""style.css"" as=""style"">
-    <link rel=""preload"" href=""teams.svg"" as=""image"" type=""image/svg+xml"">
-    <link rel=""stylesheet"" href=""style.css"">
+    <link rel=""preload"" href=""{VersionedUrl("style.css")}"" as=""style"">
+    <link rel=""preload"" href=""{VersionedUrl("teams.svg")}"" as=""image"" type=""image/svg+xml"">
+    <link rel=""stylesheet"" href=""{VersionedUrl("style.css")}"">
     
     <meta name=""description"" content=""Local footy scores for local people"">
-    <meta property=""og:image"" content=""/icon512.png"">
+    <meta property=""og:image"" content=""{VersionedUrl("/icon512.png")}"">
     <meta name=""theme-color"" content=""#f9f9fb"" media=""(prefers-color-scheme: light)"">
     <meta name=""theme-color"" content=""#2b2a33"" media=""(prefers-color-scheme: dark)"">
     
-    <link rel=""icon"" type=""image/png"" href=""/favicon96.png"" sizes=""96x96"" />
-    <link rel=""icon"" type=""image/svg+xml"" href=""/favicon.svg"" />
-    <link rel=""shortcut icon"" href=""/favicon.ico"" />
-    <link rel=""apple-touch-icon"" sizes=""180x180"" href=""/apple-touch-icon.png"" />
+    <link rel=""icon"" type=""image/png"" href=""{VersionedUrl("/favicon96.png")}"" sizes=""96x96"" />
+    <link rel=""icon"" type=""image/svg+xml"" href=""{VersionedUrl("/favicon.svg")}"" />
+    <link rel=""shortcut icon"" href=""{VersionedUrl("/favicon.ico")}"" />
+    <link rel=""apple-touch-icon"" sizes=""180x180"" href=""{VersionedUrl("/apple-touch-icon.png")}"" />
     <meta name=""apple-mobile-web-app-title"" content=""Footy"" />
-    <link rel=""manifest"" href=""/site.webmanifest"" />
+    <link rel=""manifest"" href=""{VersionedUrl("/site.webmanifest")}"" />
 </head>
 <body>
 <main>

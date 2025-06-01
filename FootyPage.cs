@@ -27,10 +27,22 @@ public class FootyPage(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "{*path}")] HttpRequestData req,
         string? path = null)
     {
-        // Handle static asset requests
+        // Handle warmup request
+        if (path == "warmup")
+        {
+            _logger.LogInformation("Warmup endpoint called");
+            var warmupResponse = req.CreateResponse(HttpStatusCode.OK);
+            warmupResponse.Headers.Add("Content-Type", "text/plain; charset=utf-8");
+            await warmupResponse.WriteStringAsync("OK");
+            return warmupResponse;
+        }
+
+        // Handle static asset requests (with or without version query string)
         if (!string.IsNullOrEmpty(path))
         {
-            return await ServeStaticAsset(req, path);
+            // Strip version query parameter if present
+            var assetPath = path.Split('?')[0];
+            return await ServeStaticAsset(req, assetPath);
         }
 
         // Handle main page request
@@ -77,7 +89,7 @@ public class FootyPage(
                     }
 
                     var round = _dataService.FindAndParseRound(jsonData, requestedRoundId, FootyConfiguration.MelbourneNow);
-                    return HtmlGenerator.GenerateCompletePage(round);
+                    return HtmlGenerator.GenerateCompletePage(round, FootyConfiguration.AssetVersion);
                 });
 
             if (string.IsNullOrEmpty(html))
@@ -158,7 +170,8 @@ public class FootyPage(
             };
 
             var response = req.CreateResponse(HttpStatusCode.OK);
-            response.Headers.Add("Cache-Control", "public, max-age=2628000, immutable");
+            // Use immutable cache for versioned assets
+            response.Headers.Add("Cache-Control", "public, max-age=31536000, immutable");
             response.Headers.Add("X-Content-Type-Options", "nosniff");
             response.Headers.Add("Referrer-Policy", "no-referrer");
             response.Headers.Add("Vary", "Accept-Encoding");
