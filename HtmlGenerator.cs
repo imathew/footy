@@ -38,8 +38,8 @@ public class HtmlGenerator()
     
     <meta name=""description"" content=""Local footy scores for local people"">
     <meta property=""og:image"" content=""{VersionedUrl("/icon512.png")}"">
-    <meta name=""theme-color"" content=""#f9f9fb"" media=""(prefers-color-scheme: light)"">
-    <meta name=""theme-color"" content=""#2b2a33"" media=""(prefers-color-scheme: dark)"">
+    <meta name=""theme-color"" content=""#fafcff"" media=""(prefers-color-scheme: light)"">
+    <meta name=""theme-color"" content=""#001e2f"" media=""(prefers-color-scheme: dark)"">
     
     <link rel=""icon"" type=""image/png"" href=""{VersionedUrl("/favicon96.png")}"" sizes=""96x96"" />
     <link rel=""icon"" type=""image/svg+xml"" href=""{VersionedUrl("/favicon.svg")}"" />
@@ -81,8 +81,7 @@ public class HtmlGenerator()
             : "<span class=\"nav-link disabled\"></span>";
 
         // Make the timestamp a refresh link
-        string currentUrl = round.Status != "active" && round.Id > 0 ? $"?round={round.Id}" : "/";
-        string dateStr = $"<a href=\"{currentUrl}\" class=\"date-time\" title=\"Click to refresh\">{round.Now:yyyy-MM-dd h:mm:ss tt}</a>";
+        string dateStr = $"<a href=\"/\" class=\"date-time\" title=\"Click to refresh\">{round.Now:yyyy-MM-dd h:mm:ss tt}</a>";
 
         string byeTeamsHtml = CreateByeTeamsHtml(round.ByeTeamIds);
 

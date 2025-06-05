@@ -1,12 +1,13 @@
 :root {
     --base-font-size: 120%;
-    --bg-color: #f9f9fb;
-    --highlight-color: #069;
-    --icon-bg: transparent;
+    --bg-color: #fafcff;
+    --dimmed-color: #536370;
+    --emphasis-color: #06c;
+    --heading-color: #001e2f;
+    --link-color: #0a7c3e;
     --monospace-font: monospace;
     --primary-font: sans-serif;
-    --secondary-color: #666;
-    --text-color: #333
+    --text-color: #1a1a1a
 }
 
 .dark-icon {
@@ -19,10 +20,12 @@
 
 @media (prefers-color-scheme: dark) {
     :root {
-        --bg-color: #2b2a33;
-        --highlight-color: #66b3ff;
-        --secondary-color: #999;
-        --text-color: #f0f0f0
+        --bg-color: #001e2f;
+        --dimmed-color: #94b2d1;
+        --emphasis-color: #40a9ff;
+        --heading-color: #fff;
+        --link-color: #10e896;
+        --text-color: #e5f3ff
     }
 
     .dark-icon {
@@ -53,7 +56,7 @@ body {
 }
 
 a {
-    color: var(--highlight-color);
+    color: var(--link-color);
     padding: .2em 0;
     text-decoration: none
 }
@@ -62,7 +65,7 @@ a {
         text-decoration: underline
     }
 
-body, #footyScores, main, table {
+body, #footyscores, main, table {
     width: 100%
 }
 
@@ -78,30 +81,46 @@ body, #footyScores, main, table {
 }
 
 .round-header {
+    color: var(--heading-color);
     font-size: .9em;
+    font-variant: small-caps;
     font-weight: 700;
+    letter-spacing: .05em;
     padding: .75em 0 .3em
 }
 
 .round-date {
-    color: var(--secondary-color);
+    color: var(--dimmed-color);
     font-size: .9em;
     font-weight: 400
 }
 
 .match-header {
-    color: var(--secondary-color);
-    font-size: .75em;
-    padding: 1.2em 0 0
+    color: var(--dimmed-color);
+    font-size: .7em;
+    font-weight: 500;
+    letter-spacing: .08em;
+    padding: 1.35em 0 0;
+    text-transform: uppercase
 }
 
     .match-header.playing {
-        color: var(--highlight-color);
+        color: var(--emphasis-color);
         font-weight: 700
     }
 
 .match-row {
     padding: .3em 0
+}
+
+    .match-row:hover {
+        background-color: #0066cc08
+    }
+
+@media (prefers-color-scheme: dark) {
+    .match-row:hover {
+        background-color: #40a9ff0d
+    }
 }
 
 .home {
@@ -113,6 +132,8 @@ body, #footyScores, main, table {
 }
 
 .team-name {
+    font-weight: 500;
+    letter-spacing: .01em;
     width: 25%
 }
 
@@ -155,32 +176,33 @@ body, #footyScores, main, table {
 }
 
 .score {
-    font-family: var(--monospace-font)
+    font-family: var(--monospace-font);
+    font-variant-numeric: tabular-nums;
+    text-align: center
 }
 
     .score.detail {
-        color: var(--secondary-color);
+        color: var(--dimmed-color);
         font-size: .85em;
+        font-variant-numeric: tabular-nums lining-nums;
         width: 10%
     }
 
     .score.total {
         font-size: 1.3em;
+        font-variant-numeric: tabular-nums lining-nums;
         font-weight: 700;
         width: 13%
     }
 
-        .score.total.home {
-            padding-right: .5em
-        }
-
-        .score.total.away {
-            padding-left: .5em
-        }
-
 .match-row.home > .team-name.home, .match-row.away > .team-name.away, .match-row.complete.level > .team-name {
-    color: var(--highlight-color);
-    font-weight: 700
+    color: var(--emphasis-color);
+    font-weight: 700;
+    letter-spacing: 0
+}
+
+.match-row.home > .team-name.away, .match-row.away > .team-name.home {
+    font-weight: 400
 }
 
 .navigation-links {
@@ -190,6 +212,9 @@ body, #footyScores, main, table {
 }
 
 .nav-link {
+    font-variant: small-caps;
+    font-weight: 400;
+    letter-spacing: .04em;
     padding: .5em
 }
 
@@ -202,10 +227,11 @@ body, #footyScores, main, table {
 }
 
 .date-time {
-    color: var(--secondary-color);
+    color: var(--dimmed-color);
     display: block;
     font-family: var(--monospace-font);
     font-size: .8em;
+    letter-spacing: .02em;
     text-align: center
 }
 

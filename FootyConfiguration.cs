@@ -9,7 +9,7 @@ public static class FootyConfiguration
     public static string ApiUrl { get; set; } = string.Empty;
     public static int ClientCacheSeconds { get; set; } = 0;
     public static int ServerCacheSeconds { get; set; } = 0;
-    public static string AssetVersion { get; set; } = "20250601";
+    public static string AssetVersion { get; set; } = "20250605";
 
     // Always show Melb time
     public static readonly TimeZoneInfo MelbourneTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Australia/Melbourne");
