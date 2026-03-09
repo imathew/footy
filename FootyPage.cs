@@ -63,6 +63,7 @@ public class FootyPage(
             {
                 _logger.LogInformation("Force refresh requested, invalidating cache");
                 _cache.Remove(cacheKey);
+                _cache.Remove("footy_data");
             }
 
             // Try to get cached HTML first
@@ -152,14 +153,16 @@ public class FootyPage(
                 return req.CreateResponse(HttpStatusCode.NotFound);
             }
 
-            if (Path.GetExtension(assetPath).Equals(".css", StringComparison.CurrentCultureIgnoreCase))
+            var ext = Path.GetExtension(assetPath);
+
+            if (ext.Equals(".css", StringComparison.CurrentCultureIgnoreCase))
             {
                 var cssContent = Encoding.UTF8.GetString(fileBytes);
                 cssContent = MinifyCss(cssContent);
                 fileBytes = Encoding.UTF8.GetBytes(cssContent);
             }
 
-            var contentType = Path.GetExtension(assetPath).ToLower() switch
+            var contentType = ext.ToLower() switch
             {
                 ".png" => "image/png",
                 ".ico" => "image/x-icon",
@@ -177,8 +180,13 @@ public class FootyPage(
             response.Headers.Add("Vary", "Accept-Encoding");
             response.Headers.Add("Content-Type", contentType);
 
-            // Compress text-based assets
-            if (contentType.StartsWith("text/") || contentType.Contains("svg") || contentType.Contains("json"))
+            // Compress text-based assets if client supports it
+            var acceptEncoding = req.Headers.TryGetValues("Accept-Encoding", out var encValues)
+                ? string.Join(",", encValues)
+                : "";
+
+            if ((contentType.StartsWith("text/") || contentType.Contains("svg") || contentType.Contains("json"))
+                && acceptEncoding.Contains("gzip"))
             {
                 response.Headers.Add("Content-Encoding", "gzip");
                 using var compressedStream = new MemoryStream();

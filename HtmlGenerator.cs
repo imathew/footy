@@ -73,11 +73,11 @@ public class HtmlGenerator()
         string roundHeader = FormatRoundHeaderWithDateRange(round);
 
         string prevLink = round.PreviousRoundId.HasValue
-            ? $"<a href=\"?round={round.PreviousRoundId}\" class=\"nav-link prev-link\">« Round {round.PreviousRoundId}</a>"
+            ? $"<a href=\"?round={round.PreviousRoundId}\" class=\"nav-link prev-link\">« {round.PreviousRoundName ?? $"Round {round.PreviousRoundId}"}</a>"
             : "<span class=\"nav-link disabled\"></span>";
 
         string nextLink = round.NextRoundId.HasValue
-            ? $"<a href=\"?round={round.NextRoundId}\" class=\"nav-link next-link\">Round {round.NextRoundId} »</a>"
+            ? $"<a href=\"?round={round.NextRoundId}\" class=\"nav-link next-link\">{round.NextRoundName ?? $"Round {round.NextRoundId}"} »</a>"
             : "<span class=\"nav-link disabled\"></span>";
 
         // Make the timestamp a refresh link
@@ -167,7 +167,7 @@ public class HtmlGenerator()
     private static string FormatRoundHeaderWithDateRange(Round round)
     {
         if (round.Matches.Count == 0)
-            return $"Round {round.Id}";
+            return round.Name;
 
         DateTime firstDate = round.Matches.Min(m => m.Date);
         DateTime lastDate = round.Matches.Max(m => m.Date);
@@ -175,11 +175,11 @@ public class HtmlGenerator()
         string dateRangeStr;
         if (firstDate.Month == lastDate.Month)
         {
-            dateRangeStr = $"Round {round.Id} <span class=\"round-date\">({firstDate:MMM} {firstDate.Day} - {lastDate.Day})</span>";
+            dateRangeStr = $"{round.Name} <span class=\"round-date\">({firstDate:MMM} {firstDate.Day} - {lastDate.Day})</span>";
         }
         else
         {
-            dateRangeStr = $"Round {round.Id} <span class=\"round-date\">({firstDate:MMM} {firstDate.Day} - {lastDate:MMM} {lastDate.Day})</span>";
+            dateRangeStr = $"{round.Name} <span class=\"round-date\">({firstDate:MMM} {firstDate.Day} - {lastDate:MMM} {lastDate.Day})</span>";
         }
 
         return dateRangeStr;
@@ -189,7 +189,7 @@ public class HtmlGenerator()
     {
         string statusText = match.Status.ToLower() switch
         {
-            "complete" => "FT",
+            "completed" or "complete" => "FT",
             "playing" when match.Clock != null => FormatClockText(match.Clock),
             "playing" => "LIVE",
             "scheduled" => TimeZoneInfo.ConvertTimeFromUtc(match.Date, FootyConfiguration.MelbourneTimeZone).ToString("ddd h:mmtt"),
@@ -204,6 +204,12 @@ public class HtmlGenerator()
         return clock switch
         {
             null => string.Empty,
+            // Named break periods from new API format
+            { Period: "QT" } => "QT",
+            { Period: "HT" } => "HT",
+            { Period: "3QT" } => "3QT",
+            { Period: "FT" } => "FT",
+            // Legacy: -1 seconds indicated a quarter break in the old API format
             { Seconds: -1, Period: "Q1" } => "QT",
             { Seconds: -1, Period: "Q2" } => "HT",
             { Seconds: -1, Period: "Q3" } => "3QT",

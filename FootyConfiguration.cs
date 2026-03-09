@@ -7,8 +7,8 @@ public static class FootyConfiguration
 {
     // This will be set once at startup from configuration
     public static string ApiUrl { get; set; } = string.Empty;
-    public static int ClientCacheSeconds { get; set; } = 0;
-    public static int ServerCacheSeconds { get; set; } = 0;
+    public static int ClientCacheSeconds { get; set; } = 1;
+    public static int ServerCacheSeconds { get; set; } = 1;
     public static string AssetVersion { get; set; } = "20250605";
 
     // Always show Melb time
