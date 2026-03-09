@@ -6,7 +6,7 @@ using System.Web;
 
 namespace FootyScores;
 
-public class HtmlGenerator()
+internal static class HtmlGenerator
 {
     public static string GenerateCompletePage(Round? round, string? assetVersion = null)
     {

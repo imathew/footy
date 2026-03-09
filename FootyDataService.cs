@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
-using System.Text.Json;
+using System.Net.Http.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
@@ -37,46 +34,30 @@ internal record RoundDto(
     [property: JsonPropertyName("games")] List<GameDto> Games,
     [property: JsonPropertyName("byeSquads")] List<int>? ByeSquads);
 
-public interface IFootyDataService
+internal interface IFootyDataService
 {
-    Task<string> FetchDataAsync();
-    Round? FindAndParseRound(string jsonData, int? requestedRoundId, DateTimeOffset now);
+    Task<List<RoundDto>> FetchDataAsync();
+    Round? FindAndParseRound(List<RoundDto> rounds, int? requestedRoundId, DateTimeOffset now);
 }
 
-public class FootyDataService : IFootyDataService
+internal class FootyDataService : IFootyDataService
 {
     private readonly HttpClient _httpClient;
 
-    private static readonly JsonSerializerOptions _jsonOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
-    };
-
     public FootyDataService(IHttpClientFactory httpClientFactory)
     {
-        _httpClient = httpClientFactory.CreateClient();
-        _httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
-        _httpClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate");
+        _httpClient = httpClientFactory.CreateClient("footy");
     }
 
-    public async Task<string> FetchDataAsync()
+    public async Task<List<RoundDto>> FetchDataAsync()
     {
         using var response = await _httpClient.GetAsync(FootyConfiguration.ApiUrl);
         response.EnsureSuccessStatusCode();
-
-        using var contentStream = await response.Content.ReadAsStreamAsync();
-
-        Stream stream = response.Content.Headers.ContentEncoding.Contains("gzip")
-            ? new GZipStream(contentStream, CompressionMode.Decompress)
-            : contentStream;
-
-        using var reader = new StreamReader(stream);
-        return await reader.ReadToEndAsync();
+        return await response.Content.ReadFromJsonAsync<List<RoundDto>>() ?? [];
     }
 
-    public Round? FindAndParseRound(string jsonData, int? requestedRoundId, DateTimeOffset now)
+    public Round? FindAndParseRound(List<RoundDto> rounds, int? requestedRoundId, DateTimeOffset now)
     {
-        var rounds = JsonSerializer.Deserialize<List<RoundDto>>(jsonData, _jsonOptions);
         if (rounds == null || rounds.Count == 0)
             return null;
 

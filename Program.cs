@@ -2,6 +2,8 @@ using FootyScores;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
+using System.Net;
+using System.Net.Http;
 
 var host = new HostBuilder()
     .ConfigureFunctionsWebApplication()
@@ -24,7 +26,13 @@ var host = new HostBuilder()
         }
 
         // Add HTTP client factory
-        services.AddHttpClient();
+        services.AddHttpClient("footy", client =>
+        {
+            client.DefaultRequestHeaders.Add("Accept", "application/json");
+        }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+        {
+            AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
+        });
 
         // Add memory caching
         services.AddMemoryCache();

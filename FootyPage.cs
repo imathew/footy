@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace FootyScores;
 
-public class FootyPage(
+internal class FootyPage(
     ILogger<FootyPage> logger,
     IFootyDataService dataService,
     IMemoryCache cache)
@@ -21,6 +21,8 @@ public class FootyPage(
     private readonly IFootyDataService _dataService = dataService;
     private readonly IMemoryCache _cache = cache;
     private static readonly string AssetsPath = Path.Combine(AppContext.BaseDirectory, "Assets");
+    private static readonly string AssetsFullPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "Assets"));
+    private record AssetCache(byte[] Raw, byte[]? Gzip);
 
     [Function("FootyScores")]
     public async Task<HttpResponseData> Run(
@@ -66,8 +68,8 @@ public class FootyPage(
                 _cache.Remove("footy_data");
             }
 
-            // Try to get cached HTML first
-            var html = await _cache.GetOrCreateAsync(
+            // Try to get cached gzip-compressed HTML first
+            var gzipHtml = await _cache.GetOrCreateAsync(
                 cacheKey,
                 async entry =>
                 {
@@ -75,7 +77,7 @@ public class FootyPage(
                     _logger.LogInformation("Cache miss, generating new page");
 
                     // Fetch data with caching
-                    var jsonData = await _cache.GetOrCreateAsync(
+                    var rounds = await _cache.GetOrCreateAsync(
                         "footy_data",
                         async entry =>
                         {
@@ -84,21 +86,22 @@ public class FootyPage(
                             return await _dataService.FetchDataAsync();
                         });
 
-                    if (string.IsNullOrEmpty(jsonData))
+                    if (rounds == null || rounds.Count == 0)
                     {
                         throw new InvalidOperationException("Failed to fetch data from API");
                     }
 
-                    var round = _dataService.FindAndParseRound(jsonData, requestedRoundId, FootyConfiguration.MelbourneNow);
-                    return HtmlGenerator.GenerateCompletePage(round, FootyConfiguration.AssetVersion);
+                    var round = _dataService.FindAndParseRound(rounds, requestedRoundId, FootyConfiguration.MelbourneNow);
+                    var html = HtmlGenerator.GenerateCompletePage(round, FootyConfiguration.AssetVersion);
+                    return Compress(Encoding.UTF8.GetBytes(html));
                 });
 
-            if (string.IsNullOrEmpty(html))
+            if (gzipHtml == null)
             {
                 throw new InvalidOperationException("Failed to generate page HTML");
             }
 
-            return await CreateHtmlResponse(req, html);
+            return await CreateHtmlResponse(req, gzipHtml);
         }
         catch (Exception ex)
         {
@@ -110,7 +113,7 @@ public class FootyPage(
         }
     }
 
-    private static async Task<HttpResponseData> CreateHtmlResponse(HttpRequestData req, string html)
+    private static async Task<HttpResponseData> CreateHtmlResponse(HttpRequestData req, byte[] gzipHtml)
     {
         var response = req.CreateResponse(HttpStatusCode.OK);
         response.Headers.Add("Cache-Control", $"private, max-age={FootyConfiguration.ClientCacheSeconds}");
@@ -119,7 +122,6 @@ public class FootyPage(
         response.Headers.Add("Vary", "Accept-Encoding");
         response.Headers.Add("Content-Type", "text/html; charset=utf-8");
 
-        // Compress if supported
         var acceptEncoding = req.Headers.TryGetValues("Accept-Encoding", out var values)
             ? string.Join(",", values)
             : "";
@@ -127,17 +129,15 @@ public class FootyPage(
         if (acceptEncoding.Contains("gzip"))
         {
             response.Headers.Add("Content-Encoding", "gzip");
-            using var compressedStream = new MemoryStream();
-            using (var gzipStream = new GZipStream(compressedStream, CompressionLevel.Optimal))
-            {
-                var bytes = Encoding.UTF8.GetBytes(html);
-                await gzipStream.WriteAsync(bytes);
-            }
-            await response.WriteBytesAsync(compressedStream.ToArray());
+            await response.WriteBytesAsync(gzipHtml);
         }
         else
         {
-            await response.WriteStringAsync(html);
+            // Rare: decompress for clients that don't support gzip
+            using var compressed = new MemoryStream(gzipHtml);
+            using var gzip = new GZipStream(compressed, CompressionMode.Decompress);
+            using var reader = new StreamReader(gzip, Encoding.UTF8);
+            await response.WriteStringAsync(await reader.ReadToEndAsync());
         }
 
         return response;
@@ -147,22 +147,11 @@ public class FootyPage(
     {
         try
         {
-            var fileBytes = await GetBinaryAssetAsync(assetPath);
-            if (fileBytes == null)
-            {
+            var asset = await GetOrBuildAssetAsync(assetPath);
+            if (asset == null)
                 return req.CreateResponse(HttpStatusCode.NotFound);
-            }
 
-            var ext = Path.GetExtension(assetPath);
-
-            if (ext.Equals(".css", StringComparison.CurrentCultureIgnoreCase))
-            {
-                var cssContent = Encoding.UTF8.GetString(fileBytes);
-                cssContent = MinifyCss(cssContent);
-                fileBytes = Encoding.UTF8.GetBytes(cssContent);
-            }
-
-            var contentType = ext.ToLower() switch
+            var contentType = Path.GetExtension(assetPath).ToLowerInvariant() switch
             {
                 ".png" => "image/png",
                 ".ico" => "image/x-icon",
@@ -173,32 +162,24 @@ public class FootyPage(
             };
 
             var response = req.CreateResponse(HttpStatusCode.OK);
-            // Use immutable cache for versioned assets
             response.Headers.Add("Cache-Control", "public, max-age=31536000, immutable");
             response.Headers.Add("X-Content-Type-Options", "nosniff");
             response.Headers.Add("Referrer-Policy", "no-referrer");
             response.Headers.Add("Vary", "Accept-Encoding");
             response.Headers.Add("Content-Type", contentType);
 
-            // Compress text-based assets if client supports it
             var acceptEncoding = req.Headers.TryGetValues("Accept-Encoding", out var encValues)
                 ? string.Join(",", encValues)
                 : "";
 
-            if ((contentType.StartsWith("text/") || contentType.Contains("svg") || contentType.Contains("json"))
-                && acceptEncoding.Contains("gzip"))
+            if (asset.Gzip != null && acceptEncoding.Contains("gzip"))
             {
                 response.Headers.Add("Content-Encoding", "gzip");
-                using var compressedStream = new MemoryStream();
-                using (var gzipStream = new GZipStream(compressedStream, CompressionLevel.Optimal))
-                {
-                    await gzipStream.WriteAsync(fileBytes);
-                }
-                await response.WriteBytesAsync(compressedStream.ToArray());
+                await response.WriteBytesAsync(asset.Gzip);
             }
             else
             {
-                await response.WriteBytesAsync(fileBytes);
+                await response.WriteBytesAsync(asset.Raw);
             }
 
             return response;
@@ -210,26 +191,41 @@ public class FootyPage(
         }
     }
 
-    private static async Task<byte[]?> GetBinaryAssetAsync(string filename)
+    private async Task<AssetCache?> GetOrBuildAssetAsync(string filename)
     {
-        // Sanitize the path to prevent directory traversal attacks
+        // Sanitize before using as cache key
         filename = filename.Replace("..", "").Replace("~", "").TrimStart('/');
-        var filePath = Path.Combine(AssetsPath, filename);
 
-        // Ensure the resolved path is still under AssetsPath
-        var fullPath = Path.GetFullPath(filePath);
-        var assetsFullPath = Path.GetFullPath(AssetsPath);
-
-        if (!fullPath.StartsWith(assetsFullPath))
+        return await _cache.GetOrCreateAsync($"asset_{filename}", async entry =>
         {
-            return null; // Attempted directory traversal
-        }
+            entry.Priority = CacheItemPriority.NeverRemove;
 
-        if (File.Exists(fullPath))
-        {
-            return await File.ReadAllBytesAsync(fullPath);
-        }
-        return null;
+            var fullPath = Path.GetFullPath(Path.Combine(AssetsPath, filename));
+            if (!fullPath.StartsWith(AssetsFullPath) || !File.Exists(fullPath))
+                return null;
+
+            var rawBytes = await File.ReadAllBytesAsync(fullPath);
+            var ext = Path.GetExtension(filename).ToLowerInvariant();
+
+            if (ext == ".css")
+            {
+                rawBytes = Encoding.UTF8.GetBytes(MinifyCss(Encoding.UTF8.GetString(rawBytes)));
+            }
+
+            byte[]? gzipBytes = ext is ".css" or ".svg" or ".webmanifest"
+                ? Compress(rawBytes)
+                : null;
+
+            return new AssetCache(rawBytes, gzipBytes);
+        });
+    }
+
+    private static byte[] Compress(byte[] data)
+    {
+        using var ms = new MemoryStream();
+        using (var gzip = new GZipStream(ms, CompressionLevel.Optimal))
+            gzip.Write(data);
+        return ms.ToArray();
     }
 
     private static string MinifyCss(string css)

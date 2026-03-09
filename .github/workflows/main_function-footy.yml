@@ -1,6 +1,3 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/azure/functions-action
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
 name: Build and deploy dotnet core app to Azure Function App - function-footy
 
 on:
@@ -26,13 +23,12 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: 'Resolve Project Dependencies Using Dotnet'
-        run: dotnet build --configuration Release --output ./output
+        run: dotnet publish --configuration Release --output ./output
       
       - name: 'Run Azure Functions Action'
         uses: Azure/functions-action@v1
         id: fa
         with:
           app-name: 'function-footy'
-          slot-name: 'Production'
           package: './output'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_5D89D648720D469CB3BD06ABE08F7EFF }}
