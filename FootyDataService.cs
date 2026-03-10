@@ -78,40 +78,46 @@ internal class FootyDataService : IFootyDataService
 
             if (foundRound == null)
             {
-                double? closestDiff = null;
-
-                for (int i = 0; i < rounds.Count; i++)
+                // Find the last round that has started (startDate <= now)
+                int lastStartedIndex = -1;
+                for (int i = rounds.Count - 1; i >= 0; i--)
                 {
-                    var round = rounds[i];
-                    if (string.IsNullOrEmpty(round.StartDate) || string.IsNullOrEmpty(round.EndDate))
-                        continue;
-
-                    if (!DateTimeOffset.TryParse(round.StartDate, out var startOffset) ||
-                        !DateTimeOffset.TryParse(round.EndDate, out var endOffset))
-                        continue;
-
-                    var start = startOffset.UtcDateTime;
-                    var end = endOffset.UtcDateTime;
-
-                    var startDiff = Math.Abs((start - now).TotalSeconds);
-                    var endDiff = Math.Abs((end - now).TotalSeconds);
-                    var diff = Math.Min(startDiff, endDiff);
-
-                    if (!closestDiff.HasValue || diff < closestDiff.Value)
+                    if (DateTimeOffset.TryParse(rounds[i].StartDate, out var startOffset) && startOffset <= now)
                     {
-                        closestDiff = diff;
-                        foundRound = round;
-                        foundRoundIndex = i;
+                        lastStartedIndex = i;
+                        break;
                     }
                 }
-            }
 
-            // Fall back to the last non-excluded round if nothing else matched
-            if (foundRound == null)
-            {
-                foundRoundIndex = rounds.FindLastIndex(r => r.Status != "scheduled");
-                if (foundRoundIndex >= 0)
-                    foundRound = rounds[foundRoundIndex];
+                if (lastStartedIndex < 0)
+                {
+                    // Season hasn't started yet, show the first round
+                    foundRound = rounds[0];
+                    foundRoundIndex = 0;
+                }
+                else
+                {
+                    var lastStartedRound = rounds[lastStartedIndex];
+
+                    // A round is unfinished if any game has passed its scheduled time but isn't complete
+                    bool isUnfinished = lastStartedRound.Games.Any(g =>
+                        g.Status != "completed" && g.Status != "complete" &&
+                        DateTimeOffset.TryParse(g.Date, out var gameDate) && gameDate <= now);
+
+                    bool withinCooldown = DateTimeOffset.TryParse(lastStartedRound.EndDate, out var endOffset) &&
+                        now < endOffset.AddHours(24);
+
+                    if (!isUnfinished && !withinCooldown && lastStartedIndex + 1 < rounds.Count)
+                    {
+                        foundRoundIndex = lastStartedIndex + 1;
+                        foundRound = rounds[foundRoundIndex];
+                    }
+                    else
+                    {
+                        foundRound = lastStartedRound;
+                        foundRoundIndex = lastStartedIndex;
+                    }
+                }
             }
         }
 
@@ -130,8 +136,7 @@ internal class FootyDataService : IFootyDataService
     {
         var matches = roundDto.Games
             .Select(ConvertDtoToMatch)
-            .Where(m => m != null)
-            .Cast<Match>()
+            .OfType<Match>()
             .OrderBy(m => m.Date)
             .ToList();
 

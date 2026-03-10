@@ -169,8 +169,13 @@ internal static class HtmlGenerator
         if (round.Matches.Count == 0)
             return round.Name;
 
-        DateTime firstDate = round.Matches.Min(m => m.Date);
-        DateTime lastDate = round.Matches.Max(m => m.Date);
+        DateTime firstDate = DateTime.MaxValue;
+        DateTime lastDate = DateTime.MinValue;
+        foreach (var m in round.Matches)
+        {
+            if (m.Date < firstDate) firstDate = m.Date;
+            if (m.Date > lastDate) lastDate = m.Date;
+        }
 
         string dateRangeStr;
         if (firstDate.Month == lastDate.Month)

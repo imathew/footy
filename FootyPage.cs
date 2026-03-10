@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace FootyScores;
 
-internal class FootyPage(
+internal partial class FootyPage(
     ILogger<FootyPage> logger,
     IFootyDataService dataService,
     IMemoryCache cache)
@@ -43,7 +43,8 @@ internal class FootyPage(
         if (!string.IsNullOrEmpty(path))
         {
             // Strip version query parameter if present
-            var assetPath = path.Split('?')[0];
+            var q = path.IndexOf('?');
+            var assetPath = q >= 0 ? path[..q] : path;
             return await ServeStaticAsset(req, assetPath);
         }
 
@@ -233,22 +234,20 @@ internal class FootyPage(
         if (string.IsNullOrWhiteSpace(css))
             return css;
 
-        // Remove comments
-        css = Regex.Replace(css, @"/\*[\s\S]*?\*/", "");
-
-        // Remove unnecessary whitespace
-        css = Regex.Replace(css, @"\s+", " ");
-
-        // Remove spaces around specific characters
-        css = Regex.Replace(css, @"\s*([{}:;,>+~])\s*", "$1");
-
-        // Remove trailing semicolon before closing brace
+        css = CssComments().Replace(css, "");
+        css = CssWhitespace().Replace(css, " ");
+        css = CssSpecialChars().Replace(css, "$1");
         css = css.Replace(";}", "}");
-
-        // Remove quotes from url() when possible
-        css = Regex.Replace(css, @"url\([""']([^""']+)[""']\)", "url($1)");
-
-        // Trim
+        css = CssUrlQuotes().Replace(css, "url($1)");
         return css.Trim();
     }
+
+    [GeneratedRegex(@"/\*[\s\S]*?\*/")]
+    private static partial Regex CssComments();
+    [GeneratedRegex(@"\s+")]
+    private static partial Regex CssWhitespace();
+    [GeneratedRegex(@"\s*([{}:;,>+~])\s*")]
+    private static partial Regex CssSpecialChars();
+    [GeneratedRegex(@"url\([""']([^""']+)[""']\)")]
+    private static partial Regex CssUrlQuotes();
 }
