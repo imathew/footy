@@ -93,7 +93,7 @@ internal partial class FootyPage(
                     }
 
                     var round = _dataService.FindAndParseRound(rounds, requestedRoundId, FootyConfiguration.MelbourneNow);
-                    var html = HtmlGenerator.GenerateCompletePage(round, FootyConfiguration.AssetVersion);
+                    var html = HtmlGenerator.GenerateCompletePage(round, FootyConfiguration.AssetVersion, forceRefresh);
                     return Compress(Encoding.UTF8.GetBytes(html));
                 });
 

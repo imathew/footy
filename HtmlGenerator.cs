@@ -8,10 +8,10 @@ namespace FootyScores;
 
 internal static class HtmlGenerator
 {
-    public static string GenerateCompletePage(Round? round, string? assetVersion = null)
+    public static string GenerateCompletePage(Round? round, string? assetVersion = null, bool includeRefreshLink = false)
     {
         var scoresHtml = round != null
-            ? GenerateRoundHtml(round)
+            ? GenerateRoundHtml(round, includeRefreshLink)
             : "<table class=\"round-table\"><thead><tr><th class=\"round-header\">No round found!</th></tr></thead></table>";
 
         // Helper function to add version to asset URLs
@@ -62,7 +62,7 @@ internal static class HtmlGenerator
         return html;
     }
 
-    private static string GenerateRoundHtml(Round round)
+    private static string GenerateRoundHtml(Round round, bool includeRefreshLink)
     {
         var matchesHtml = new StringBuilder();
         foreach (var match in round.Matches)
@@ -72,16 +72,19 @@ internal static class HtmlGenerator
 
         string roundHeader = FormatRoundHeaderWithDateRange(round);
 
+        var refreshSuffix = includeRefreshLink ? "&refresh=true" : string.Empty;
+
         string prevLink = round.PreviousRoundId.HasValue
-            ? $"<a href=\"?round={round.PreviousRoundId}\" class=\"nav-link prev-link\">« {round.PreviousRoundName ?? $"Round {round.PreviousRoundId}"}</a>"
+            ? $"<a href=\"?round={round.PreviousRoundId}{refreshSuffix}\" class=\"nav-link prev-link\">« {round.PreviousRoundName ?? $"Round {round.PreviousRoundId}"}</a>"
             : "<span class=\"nav-link disabled\"></span>";
 
         string nextLink = round.NextRoundId.HasValue
-            ? $"<a href=\"?round={round.NextRoundId}\" class=\"nav-link next-link\">{round.NextRoundName ?? $"Round {round.NextRoundId}"} »</a>"
+            ? $"<a href=\"?round={round.NextRoundId}{refreshSuffix}\" class=\"nav-link next-link\">{round.NextRoundName ?? $"Round {round.NextRoundId}"} »</a>"
             : "<span class=\"nav-link disabled\"></span>";
 
-        // Make the timestamp a refresh link
-        string dateStr = $"<a href=\"/\" class=\"date-time\" title=\"Click to refresh\">{round.Now:yyyy-MM-dd h:mm:ss tt}</a>";
+        // Make the timestamp a refresh link (only append ?refresh=true when refresh is already enabled)
+        var refreshQuery = includeRefreshLink ? "?refresh=true" : string.Empty;
+        string dateStr = $"<a href=\"/{refreshQuery}\" class=\"date-time\" title=\"Click to refresh\">{round.Now:yyyy-MM-dd h:mm:ss tt}</a>";
 
         string byeTeamsHtml = CreateByeTeamsHtml(round.ByeTeamIds);
 
