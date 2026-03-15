@@ -122,24 +122,8 @@ internal partial class FootyPage(
         response.Headers.Add("Referrer-Policy", "no-referrer");
         response.Headers.Add("Vary", "Accept-Encoding");
         response.Headers.Add("Content-Type", "text/html; charset=utf-8");
-
-        var acceptEncoding = req.Headers.TryGetValues("Accept-Encoding", out var values)
-            ? string.Join(",", values)
-            : "";
-
-        if (acceptEncoding.Contains("gzip"))
-        {
-            response.Headers.Add("Content-Encoding", "gzip");
-            await response.WriteBytesAsync(gzipHtml);
-        }
-        else
-        {
-            // Rare: decompress for clients that don't support gzip
-            using var compressed = new MemoryStream(gzipHtml);
-            using var gzip = new GZipStream(compressed, CompressionMode.Decompress);
-            using var reader = new StreamReader(gzip, Encoding.UTF8);
-            await response.WriteStringAsync(await reader.ReadToEndAsync());
-        }
+        response.Headers.Add("Content-Encoding", "gzip");
+        await response.WriteBytesAsync(gzipHtml);
 
         return response;
     }

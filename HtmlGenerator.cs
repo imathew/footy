@@ -37,11 +37,9 @@ internal static class HtmlGenerator
     <link rel=""stylesheet"" href=""{VersionedUrl("style.css")}"">
     
     <meta name=""description"" content=""Local footy scores for local people"">
-    <meta property=""og:image"" content=""{VersionedUrl("/icon512.png")}"">
     <meta name=""theme-color"" content=""#fafcff"" media=""(prefers-color-scheme: light)"">
     <meta name=""theme-color"" content=""#001e2f"" media=""(prefers-color-scheme: dark)"">
     
-    <link rel=""icon"" type=""image/png"" href=""{VersionedUrl("/favicon96.png")}"" sizes=""96x96"" />
     <link rel=""icon"" type=""image/svg+xml"" href=""{VersionedUrl("/favicon.svg")}"" />
     <link rel=""shortcut icon"" href=""{VersionedUrl("/favicon.ico")}"" />
     <link rel=""apple-touch-icon"" sizes=""180x180"" href=""{VersionedUrl("/apple-touch-icon.png")}"" />
@@ -127,6 +125,8 @@ internal static class HtmlGenerator
         string matchHeader = FormatMatchHeader(match, venueNickname);
         string homeScoreDetail = $"{match.Home.Score.Goals}.{match.Home.Score.Behinds}";
         string awayScoreDetail = $"{match.Away.Score.Goals}.{match.Away.Score.Behinds}";
+        string homeTeamId = homeTeamNickname.ToLower();
+        string awayTeamId = awayTeamNickname.ToLower();
 
         string winningClass = match.Home.Score.Total > match.Away.Score.Total ? "home" :
                              match.Away.Score.Total > match.Home.Score.Total ? "away" : "level";
@@ -136,14 +136,14 @@ internal static class HtmlGenerator
             <td colspan=""8"" class=""match-header {match.Status}"">{matchHeader}</td>
         </tr>
         <tr class=""match-row {match.Status} {winningClass}"">
-            <td class=""team-icon home""><svg><use class=""light-icon"" href=""/teams.svg#{homeTeamNickname.ToLower()}""></use><use class=""dark-icon"" href=""/teams.svg#{homeTeamNickname.ToLower()}-dark""></use></svg></td>
+            <td class=""team-icon home""><svg><use class=""light-icon"" href=""/teams.svg#{homeTeamId}""></use><use class=""dark-icon"" href=""/teams.svg#{homeTeamId}-dark""></use></svg></td>
             <td class=""team-name home"">{homeTeamNickname}</td>
             <td class=""score detail home"">{homeScoreDetail}</td>
             <td class=""score total home"">{match.Home.Score.Total}</td>
             <td class=""score total away"">{match.Away.Score.Total}</td>
             <td class=""score detail away"">{awayScoreDetail}</td>
             <td class=""team-name away"">{awayTeamNickname}</td>
-            <td class=""team-icon away""><svg><use class=""light-icon"" href=""/teams.svg#{awayTeamNickname.ToLower()}""></use><use class=""dark-icon"" href=""/teams.svg#{awayTeamNickname.ToLower()}-dark""></use></svg></td>
+            <td class=""team-icon away""><svg><use class=""light-icon"" href=""/teams.svg#{awayTeamId}""></use><use class=""dark-icon"" href=""/teams.svg#{awayTeamId}-dark""></use></svg></td>
         </tr>";
     }
 
@@ -158,7 +158,8 @@ internal static class HtmlGenerator
         {
             if (FootyConfiguration.Teams.TryGetValue(teamId, out var teamName))
             {
-                html.Append($"<svg class=\"bye-team-icon\"><use class=\"light-icon\" href=\"/teams.svg#{teamName.ToLower()}\"></use><use class=\"dark-icon\" href=\"/teams.svg#{teamName.ToLower()}-dark\"></use></svg>");
+                var teamNameId = teamName.ToLower();
+                html.Append($"<svg class=\"bye-team-icon\"><use class=\"light-icon\" href=\"/teams.svg#{teamNameId}\"></use><use class=\"dark-icon\" href=\"/teams.svg#{teamNameId}-dark\"></use></svg>");
             }
         }
 
@@ -169,28 +170,15 @@ internal static class HtmlGenerator
 
     private static string FormatRoundHeaderWithDateRange(Round round)
     {
-        if (round.Matches.Count == 0)
+        if (round.FirstMatchDate == null || round.LastMatchDate == null)
             return round.Name;
 
-        DateTime firstDate = DateTime.MaxValue;
-        DateTime lastDate = DateTime.MinValue;
-        foreach (var m in round.Matches)
-        {
-            if (m.Date < firstDate) firstDate = m.Date;
-            if (m.Date > lastDate) lastDate = m.Date;
-        }
+        var firstDate = round.FirstMatchDate.Value;
+        var lastDate = round.LastMatchDate.Value;
 
-        string dateRangeStr;
-        if (firstDate.Month == lastDate.Month)
-        {
-            dateRangeStr = $"{round.Name} <span class=\"round-date\">({firstDate:MMM} {firstDate.Day} - {lastDate.Day})</span>";
-        }
-        else
-        {
-            dateRangeStr = $"{round.Name} <span class=\"round-date\">({firstDate:MMM} {firstDate.Day} - {lastDate:MMM} {lastDate.Day})</span>";
-        }
-
-        return dateRangeStr;
+        return firstDate.Month == lastDate.Month
+            ? $"{round.Name} <span class=\"round-date\">({firstDate:MMM} {firstDate.Day} - {lastDate.Day})</span>"
+            : $"{round.Name} <span class=\"round-date\">({firstDate:MMM} {firstDate.Day} - {lastDate:MMM} {lastDate.Day})</span>";
     }
 
     private static string FormatMatchHeader(Match match, string venueNickname)
